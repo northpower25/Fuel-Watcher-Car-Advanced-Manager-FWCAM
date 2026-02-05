@@ -74,13 +74,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors["base"] = "missing_coordinates"
             return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
         
-        try:
-            lat = float(lat)
-            lon = float(lon)
-            if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
-                errors["base"] = "invalid_coordinates"
-                return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
-        except (ValueError, TypeError):
+        # Validate coordinate ranges (vol.Coerce already converted to float)
+        if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
             errors["base"] = "invalid_coordinates"
             return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
@@ -94,7 +89,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         entry_data = {
             CONF_LATITUDE: lat,
             CONF_LONGITUDE: lon,
-            CONF_RADIUS: int(user_input.get(CONF_RADIUS, DEFAULT_RADIUS)),
+            CONF_RADIUS: user_input.get(CONF_RADIUS, DEFAULT_RADIUS),
             CONF_FUEL_TYPE: user_input.get(CONF_FUEL_TYPE, DEFAULT_FUEL_TYPE),
             CONF_NOTIFY_CHANNELS: user_input.get(CONF_NOTIFY_CHANNELS, DEFAULT_NOTIFY_CHANNELS),
         }
