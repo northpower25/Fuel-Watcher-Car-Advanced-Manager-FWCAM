@@ -55,9 +55,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         schema = vol.Schema(
             {
-                vol.Required(CONF_LATITUDE, default=default_lat): float,
-                vol.Required(CONF_LONGITUDE, default=default_lon): float,
-                vol.Optional(CONF_RADIUS, default=DEFAULT_RADIUS): int,
+                vol.Optional(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
+                vol.Optional(CONF_LONGITUDE, default=default_lon): vol.Coerce(float),
+                vol.Optional(CONF_RADIUS, default=DEFAULT_RADIUS): vol.Coerce(int),
                 vol.Optional(CONF_FUEL_TYPE, default=DEFAULT_FUEL_TYPE): str,
                 vol.Optional(CONF_NOTIFY_CHANNELS, default=DEFAULT_NOTIFY_CHANNELS): list,
             }
@@ -69,19 +69,31 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         lat = user_input.get(CONF_LATITUDE)
         lon = user_input.get(CONF_LONGITUDE)
+        
         if lat is None or lon is None:
             errors["base"] = "missing_coordinates"
+            return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+        
+        try:
+            lat = float(lat)
+            lon = float(lon)
+            if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                errors["base"] = "invalid_coordinates"
+                return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+        except (ValueError, TypeError):
+            errors["base"] = "invalid_coordinates"
             return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
         try:
             await self.async_set_unique_id("fwcam_default")
             self._abort_if_unique_id_configured()
-        except Exception:
-            _LOGGER.debug("FWCAM config_flow: unique id handling skipped or already configured")
+        except Exception as exc:
+            _LOGGER.debug("FWCAM config_flow: unique id check exception: %s", exc)
+            return self.async_abort(reason="already_configured")
 
         entry_data = {
-            CONF_LATITUDE: float(lat),
-            CONF_LONGITUDE: float(lon),
+            CONF_LATITUDE: lat,
+            CONF_LONGITUDE: lon,
             CONF_RADIUS: int(user_input.get(CONF_RADIUS, DEFAULT_RADIUS)),
             CONF_FUEL_TYPE: user_input.get(CONF_FUEL_TYPE, DEFAULT_FUEL_TYPE),
             CONF_NOTIFY_CHANNELS: user_input.get(CONF_NOTIFY_CHANNELS, DEFAULT_NOTIFY_CHANNELS),
@@ -119,9 +131,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         current = self.config_entry.options or {}
         schema = vol.Schema(
             {
-                vol.Optional(CONF_LATITUDE, default=current.get(CONF_LATITUDE, self.config_entry.data.get(CONF_LATITUDE))): float,
-                vol.Optional(CONF_LONGITUDE, default=current.get(CONF_LONGITUDE, self.config_entry.data.get(CONF_LONGITUDE))): float,
-                vol.Optional(CONF_RADIUS, default=current.get(CONF_RADIUS, self.config_entry.data.get(CONF_RADIUS, DEFAULT_RADIUS))): int,
+                vol.Optional(CONF_LATITUDE, default=current.get(CONF_LATITUDE, self.config_entry.data.get(CONF_LATITUDE))): vol.Coerce(float),
+                vol.Optional(CONF_LONGITUDE, default=current.get(CONF_LONGITUDE, self.config_entry.data.get(CONF_LONGITUDE))): vol.Coerce(float),
+                vol.Optional(CONF_RADIUS, default=current.get(CONF_RADIUS, self.config_entry.data.get(CONF_RADIUS, DEFAULT_RADIUS))): vol.Coerce(int),
                 vol.Optional(CONF_FUEL_TYPE, default=current.get(CONF_FUEL_TYPE, self.config_entry.data.get(CONF_FUEL_TYPE, DEFAULT_FUEL_TYPE))): str,
                 vol.Optional(CONF_NOTIFY_CHANNELS, default=current.get(CONF_NOTIFY_CHANNELS, self.config_entry.data.get(CONF_NOTIFY_CHANNELS, DEFAULT_NOTIFY_CHANNELS))): list,
             }

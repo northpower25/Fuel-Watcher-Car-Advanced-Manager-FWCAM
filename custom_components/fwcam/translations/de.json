@@ -4,12 +4,38 @@
     "step": {
       "user": {
         "title": "Fuel Watcher konfigurieren",
-        "description": "Lege globale Standardwerte für Kraftstofftyp, Suchradius und Benachrichtigungskanäle fest."
+        "description": "Lege globale Standardwerte für Kraftstofftyp, Suchradius und Benachrichtigungskanäle fest.",
+        "data": {
+          "latitude": "Breitengrad",
+          "longitude": "Längengrad",
+          "radius": "Suchradius (km)",
+          "fuel_type": "Kraftstofftyp",
+          "notify_channels": "Benachrichtigungskanäle"
+        }
       }
     },
-    "options": {
-      "title": "FWCAM Optionen",
-      "description": "Passe globale Standardwerte und Benachrichtigungskanäle an."
+    "error": {
+      "missing_coordinates": "Breitengrad und Längengrad sind erforderlich",
+      "invalid_coordinates": "Ungültige Werte für Breitengrad oder Längengrad"
+    },
+    "abort": {
+      "unknown": "Ein unerwarteter Fehler ist während der Einrichtung aufgetreten",
+      "already_configured": "Diese Integration ist bereits konfiguriert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "FWCAM Optionen",
+        "description": "Passe globale Standardwerte und Benachrichtigungskanäle an.",
+        "data": {
+          "latitude": "Breitengrad",
+          "longitude": "Längengrad",
+          "radius": "Suchradius (km)",
+          "fuel_type": "Kraftstofftyp",
+          "notify_channels": "Benachrichtigungskanäle"
+        }
+      }
     }
   },
   "entity": {
