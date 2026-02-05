@@ -1,14 +1,3 @@
-# FILE: custom_components/fwcam/manifest.json
-# COMMIT TITLE: feat(v0.1.0): add manifest and base integration metadata
-# COMMIT DESCRIPTION:
-# - Added initial manifest.json for FWCAM integration
-# - Defined domain, name, version, requirements, IoT class, and dependencies
-# - Prepared structure for future modules (providers, messaging, sensors)
-# FILE DESCRIPTION:
-#   Home Assistant manifest file defining the integration metadata.
-#   This file registers the domain, version, requirements, and supported platforms.
-# DEPENDENCIES:
-#   None directly; required by Home Assistant to load the integration.
 {
   "domain": "fwcam",
   "name": "Fuel Watcher Car Advanced Manager",
