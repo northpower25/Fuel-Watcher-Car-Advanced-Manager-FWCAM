@@ -1,1 +1,31 @@
-
+{
+  "title": "Fuel Watcher Car Advanced Manager",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Fuel Watcher konfigurieren",
+        "description": "Lege globale Standardwerte für Kraftstofftyp, Suchradius und Benachrichtigungskanäle fest."
+      }
+    },
+    "options": {
+      "title": "FWCAM Optionen",
+      "description": "Passe globale Standardwerte und Benachrichtigungskanäle an."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "forecast_days_left": {
+        "name": "FWCAM: Tage bis leer",
+        "state": "Geschätzte Tage bis leer"
+      },
+      "recommended_station": {
+        "name": "FWCAM: Empfohlene Tankstelle",
+        "state": "Empfohlene Tankstelle zum Tanken"
+      }
+    }
+  },
+  "notifications": {
+    "refuel_detected": "Tanken erkannt für {vehicle_name}: {liters} L zu {price} {currency}",
+    "low_range": "Geringe Reichweite für {vehicle_name}: noch {km_left} km"
+  }
+}
