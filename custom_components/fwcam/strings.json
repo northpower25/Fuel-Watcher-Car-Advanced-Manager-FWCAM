@@ -37,21 +37,5 @@
         }
       }
     }
-  },
-  "entity": {
-    "sensor": {
-      "forecast_days_left": {
-        "name": "FWCAM: Days to Empty",
-        "state": "Estimated days until empty"
-      },
-      "recommended_station": {
-        "name": "FWCAM: Recommended Station",
-        "state": "Recommended refueling station"
-      }
-    }
-  },
-  "notifications": {
-    "refuel_detected": "Refuel detected for {vehicle_name}: {liters} L at {price} {currency}",
-    "low_range": "Low range for {vehicle_name}: {km_left} km remaining"
   }
 }
