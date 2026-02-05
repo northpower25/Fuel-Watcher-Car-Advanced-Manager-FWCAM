@@ -1,15 +1,15 @@
 # FILE: custom_components/fwcam/__init__.py
-# COMMIT TITLE: feat(v0.1.0): register coordinator and forward sensor platforms
+# COMMIT TITLE: fix(v0.1.3): validate config entry data and fail gracefully on missing values
 # COMMIT DESCRIPTION:
-# - Register FwcamDataUpdateCoordinator during async_setup_entry
-# - Store coordinator in hass.data[DOMAIN][entry_id]["coordinator"]
-# - Forward setup to sensor platform
-# - Added graceful unload logic to unload platforms and cleanup
+# - Validate required config entry fields (latitude, longitude, radius) before creating coordinator.
+# - Use hass.config defaults when entry data is missing.
+# - Log clear errors and return False instead of raising unhandled exceptions.
+# - Keep robust unload handling.
 # FILE DESCRIPTION:
-#   Integration bootstrap: creates and registers the DataUpdateCoordinator,
+#   Integration bootstrap: validates config entry data, creates and registers the DataUpdateCoordinator,
 #   forwards platform setup (sensors) and handles unload.
 # DEPENDENCIES:
-#   Imports: coordinator.FwcamDataUpdateCoordinator, const.DOMAIN
+#   Imports: coordinator.FwcamDataUpdateCoordinator, const.DOMAIN, homeassistant.const CONF_*
 #   Used by: sensors, providers, config_flow
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from typing import Final
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.const import Platform, CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS
 
 from .const import DOMAIN
 from .coordinator import FwcamDataUpdateCoordinator
@@ -36,17 +36,49 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up FWCAM from a config entry."""
+    """Set up FWCAM from a config entry with defensive validation."""
     _LOGGER.info("Setting up FWCAM integration (entry_id=%s)", entry.entry_id)
     try:
+        # Ensure hass.data structure
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN].setdefault(entry.entry_id, {})
+
+        # Read required values with sensible defaults
+        latitude = entry.data.get(CONF_LATITUDE, hass.config.latitude)
+        longitude = entry.data.get(CONF_LONGITUDE, hass.config.longitude)
+        radius = entry.data.get(CONF_RADIUS, 5)
+
+        # Validate presence of coordinates
+        if latitude is None or longitude is None:
+            _LOGGER.error(
+                "FWCAM async_setup_entry: missing coordinates in config entry (entry_id=%s). "
+                "Please reconfigure the integration and provide latitude/longitude.",
+                entry.entry_id,
+            )
+            return False
+
+        # Normalize types
+        try:
+            latitude = float(latitude)
+            longitude = float(longitude)
+            radius = int(radius)
+        except Exception:
+            _LOGGER.exception("FWCAM async_setup_entry: invalid types for latitude/longitude/radius")
+            return False
+
+        # Store validated config values for later use by coordinator/providers
+        hass.data[DOMAIN][entry.entry_id]["config"] = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "radius": radius,
+            **{k: v for k, v in entry.data.items() if k not in (CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS)},
+        }
 
         # Create and store coordinator
         coordinator = FwcamDataUpdateCoordinator(hass, entry)
         hass.data[DOMAIN][entry.entry_id]["coordinator"] = coordinator
 
-        # Start initial refresh
+        # Start initial refresh (coordinator is robust and returns placeholder snapshot)
         await coordinator.async_config_entry_first_refresh()
 
         # Forward setup to platforms (sensors)
@@ -59,7 +91,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
     except Exception as exc:  # pylint: disable=broad-except
         _LOGGER.exception("FWCAM async_setup_entry failed: %s", exc)
-        raise
+        # Return False so HA treats setup as failed without an unhandled 500
+        return False
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -82,11 +115,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     _LOGGER.debug("FWCAM unloaded (entry_id=%s) unload_ok=%s", entry.entry_id, unload_ok)
     return unload_ok
-
-
-# TODO:
-# - Initialize provider registry and caches here
-# - Register services (manual refuel, recalc forecast)
-# - Create device entries in device registry for each vehicle
-# CHANGE HISTORY
-# v0.1.0 - Registered coordinator and platform forwarding
