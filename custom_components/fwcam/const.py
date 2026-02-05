@@ -1,8 +1,8 @@
 # FILE: custom_components/fwcam/const.py
 # COMMIT TITLE: feat(v0.1.0): add constants and defaults
 # COMMIT DESCRIPTION:
-#- Centralize domain, config keys and defaults used across the integration. 
-# FILE DESCRIPTION: Constants used by config_flow, init, coordinator and sensors. 
+# - Centralize domain, config keys and defaults used across the integration.
+# FILE DESCRIPTION: Constants used by config_flow, init, coordinator and sensors.
 # DEPENDENCIES:
 # - None (pure constants)
 
