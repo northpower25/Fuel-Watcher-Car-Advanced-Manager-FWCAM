@@ -69,11 +69,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         lat = user_input.get(CONF_LATITUDE)
         lon = user_input.get(CONF_LONGITUDE)
-        
+
         if lat is None or lon is None:
             errors["base"] = "missing_coordinates"
             return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
-        
+
         # Validate coordinate ranges (vol.Coerce already converted to float)
         if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
             errors["base"] = "invalid_coordinates"
