@@ -14,3 +14,7 @@ CONF_NOTIFY_CHANNELS = "notify_channels"
 DEFAULT_FUEL_TYPE = "gasoline"
 DEFAULT_RADIUS = 5
 DEFAULT_NOTIFY_CHANNELS = []
+
+# Sensor attribute keys
+ATTR_LITERS = "liters"
+ATTR_ODOMETER = "odometer"
