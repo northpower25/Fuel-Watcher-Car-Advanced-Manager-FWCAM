@@ -1,7 +1,7 @@
 {
   "domain": "fwcam",
   "name": "Fuel Watcher Car Advanced Manager",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "documentation": "https://github.com/northpower25/Fuel-Watcher-Car-Advanced-Manager-FWCAM",
   "issue_tracker": "https://github.com/northpower25/Fuel-Watcher-Car-Advanced-Manager-FWCAM/issues",
   "requirements": [],
