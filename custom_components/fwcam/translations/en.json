@@ -1,1 +1,31 @@
-
+{
+  "title": "Fuel Watcher Car Advanced Manager",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Fuel Watcher",
+        "description": "Set global defaults for fuel type, search radius and notification channels."
+      }
+    },
+    "options": {
+      "title": "FWCAM Options",
+      "description": "Adjust global defaults and notification channels."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "forecast_days_left": {
+        "name": "FWCAM: Days to Empty",
+        "state": "Estimated days until empty"
+      },
+      "recommended_station": {
+        "name": "FWCAM: Recommended Station",
+        "state": "Recommended refueling station"
+      }
+    }
+  },
+  "notifications": {
+    "refuel_detected": "Refuel detected for {vehicle_name}: {liters} L at {price} {currency}",
+    "low_range": "Low range for {vehicle_name}: {km_left} km remaining"
+  }
+}
