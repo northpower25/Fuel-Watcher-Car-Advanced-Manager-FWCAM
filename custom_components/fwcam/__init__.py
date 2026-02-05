@@ -11,6 +11,7 @@
 # DEPENDENCIES:
 #   Imports: coordinator.FwcamDataUpdateCoordinator, const.DOMAIN
 #   Used by: sensors, providers, config_flow
+
 from __future__ import annotations
 
 import logging
@@ -19,7 +20,6 @@ from typing import Final
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN
 from .coordinator import FwcamDataUpdateCoordinator
@@ -38,35 +38,44 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up FWCAM from a config entry."""
     _LOGGER.info("Setting up FWCAM integration (entry_id=%s)", entry.entry_id)
+    try:
+        hass.data.setdefault(DOMAIN, {})
+        hass.data[DOMAIN].setdefault(entry.entry_id, {})
 
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN].setdefault(entry.entry_id, {})
+        # Create and store coordinator
+        coordinator = FwcamDataUpdateCoordinator(hass, entry)
+        hass.data[DOMAIN][entry.entry_id]["coordinator"] = coordinator
 
-    # Create and store coordinator
-    coordinator = FwcamDataUpdateCoordinator(hass, entry)
-    hass.data[DOMAIN][entry.entry_id]["coordinator"] = coordinator
+        # Start initial refresh
+        await coordinator.async_config_entry_first_refresh()
 
-    # Start initial refresh
-    await coordinator.async_config_entry_first_refresh()
+        # Forward setup to platforms (sensors)
+        for platform in PLATFORMS:
+            hass.async_create_task(
+                hass.config_entries.async_forward_entry_setup(entry, platform)
+            )
 
-    # Forward setup to platforms (sensors)
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, platform)
-        )
-
-    _LOGGER.debug("FWCAM coordinator registered and platforms forwarded.")
-    return True
+        _LOGGER.debug("FWCAM coordinator registered and platforms forwarded.")
+        return True
+    except Exception as exc:  # pylint: disable=broad-except
+        _LOGGER.exception("FWCAM async_setup_entry failed: %s", exc)
+        raise
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.info("Unloading FWCAM integration (entry_id=%s)", entry.entry_id)
 
-    unload_ok = all(
-        await hass.config_entries.async_forward_entry_unload(entry, platform)
-        for platform in PLATFORMS
-    )
+    results = []
+    for platform in PLATFORMS:
+        try:
+            res = await hass.config_entries.async_forward_entry_unload(entry, platform)
+            results.append(bool(res))
+        except Exception:
+            _LOGGER.exception("Error unloading platform %s for entry %s", platform, entry.entry_id)
+            results.append(False)
+
+    unload_ok = all(results)
 
     # Cleanup coordinator and stored data
     hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
