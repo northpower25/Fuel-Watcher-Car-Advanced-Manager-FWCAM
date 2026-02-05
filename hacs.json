@@ -1,1 +1,15 @@
+// FILE: hacs.json
+// COMMIT TITLE: chore(v0.1.0): add basic HACS metadata
+// COMMIT DESCRIPTION:
+// - Added minimal hacs.json for HACS compatibility
+// - Defined name, content_in_root, and render_readme
+// FILE DESCRIPTION:
+//   HACS metadata file so HACS can recognize and install the integration.
+//   Required at repository root for HACS custom repositories.
 
+{
+  "name": "Fuel Watcher Car Advanced Manager",
+  "content_in_root": false,
+  "render_readme": true,
+  "country": "DE"
+}
