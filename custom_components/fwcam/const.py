@@ -10,8 +10,9 @@ DOMAIN = "fwcam"
 
 CONF_FUEL_TYPE = "fuel_type"
 CONF_NOTIFY_CHANNELS = "notify_channels"
+CONF_TANKERKOENIG_API_KEY = "tankerkoenig_api_key"
 
-DEFAULT_FUEL_TYPE = "gasoline"
+DEFAULT_FUEL_TYPE = "e5"
 DEFAULT_RADIUS = 5
 DEFAULT_NOTIFY_CHANNELS = []
 

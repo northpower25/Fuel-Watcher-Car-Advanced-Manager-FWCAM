@@ -9,7 +9,8 @@
           "latitude": "Breitengrad",
           "longitude": "Längengrad",
           "radius": "Suchradius (km)",
-          "fuel_type": "Kraftstofftyp",
+          "fuel_type": "Kraftstofftyp (e5, e10, diesel, all)",
+          "tankerkoenig_api_key": "Tankerkönig API-Schlüssel",
           "notify_channels": "Benachrichtigungskanäle"
         }
       }
@@ -32,7 +33,8 @@
           "latitude": "Breitengrad",
           "longitude": "Längengrad",
           "radius": "Suchradius (km)",
-          "fuel_type": "Kraftstofftyp",
+          "fuel_type": "Kraftstofftyp (e5, e10, diesel, all)",
+          "tankerkoenig_api_key": "Tankerkönig API-Schlüssel",
           "notify_channels": "Benachrichtigungskanäle"
         }
       }

@@ -17,8 +17,10 @@ from typing import Any, Dict, Optional
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS
 
-from .const import DOMAIN
+from .const import DOMAIN, CONF_FUEL_TYPE, CONF_TANKERKOENIG_API_KEY, DEFAULT_FUEL_TYPE
+from .providers.tankerkönig import TankerkoenigProvider
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +44,10 @@ class FwcamDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             "last_update": None,
             "config": {},
         }
+        
+        # Initialize Tankerkönig provider
+        api_key = entry.data.get(CONF_TANKERKOENIG_API_KEY, "")
+        self._tankerkoenig_provider = TankerkoenigProvider(api_key) if api_key else None
 
     async def _async_update_data(self) -> Dict[str, Any]:
         try:
@@ -54,7 +60,8 @@ class FwcamDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             raise UpdateFailed(err) from err
 
     async def async_fetch_data(self) -> Dict[str, Any]:
-        _LOGGER.debug("FWCAM coordinator: async_fetch_data placeholder called.")
+        """Fetch data from Tankerkönig API and other sources."""
+        _LOGGER.debug("FWCAM coordinator: async_fetch_data called.")
 
         if not isinstance(self._state, dict):
             self._state = {
@@ -68,6 +75,45 @@ class FwcamDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
         config = self.hass.data.get(DOMAIN, {}).get(self.entry.entry_id, {}).get("config", {})
         self._state["config"] = config
+
+        # Fetch station data from Tankerkönig API
+        if self._tankerkoenig_provider:
+            try:
+                latitude = config.get("latitude") or self.entry.data.get(CONF_LATITUDE)
+                longitude = config.get("longitude") or self.entry.data.get(CONF_LONGITUDE)
+                radius = config.get("radius") or self.entry.data.get(CONF_RADIUS, 5)
+                fuel_type = config.get("fuel_type") or self.entry.data.get(CONF_FUEL_TYPE, DEFAULT_FUEL_TYPE)
+                
+                if latitude is not None and longitude is not None:
+                    _LOGGER.debug(
+                        "Fetching stations from Tankerkönig: lat=%s, lng=%s, radius=%s, fuel_type=%s",
+                        latitude,
+                        longitude,
+                        radius,
+                        fuel_type,
+                    )
+                    stations = await self._tankerkoenig_provider.fetch_stations(
+                        float(latitude),
+                        float(longitude),
+                        int(radius),
+                        str(fuel_type),
+                    )
+                    self._state["providers"]["tankerkoenig"] = {
+                        "stations": stations,
+                        "count": len(stations),
+                    }
+                    _LOGGER.info("Successfully fetched %d valid stations from Tankerkönig", len(stations))
+                else:
+                    _LOGGER.warning("Cannot fetch Tankerkönig data: missing coordinates")
+            except Exception as err:
+                _LOGGER.exception("Error fetching Tankerkönig data: %s", err)
+                self._state["providers"]["tankerkoenig"] = {
+                    "stations": [],
+                    "count": 0,
+                    "error": str(err),
+                }
+        else:
+            _LOGGER.debug("Tankerkönig provider not initialized (missing API key)")
 
         try:
             self._state["last_update"] = datetime.now(timezone.utc).isoformat()
