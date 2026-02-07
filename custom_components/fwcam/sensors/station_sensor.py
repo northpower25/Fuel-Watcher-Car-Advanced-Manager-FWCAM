@@ -83,6 +83,8 @@ class FwcamStationSensor(CoordinatorEntity, Entity):
             # Find the station with the best price for the configured fuel type
             best_station = None
             best_price = float("inf")
+            selected_fuel_type = None
+            selected_price = None
 
             for station in stations:
                 price_obj = station.get("price", {})
@@ -93,15 +95,15 @@ class FwcamStationSensor(CoordinatorEntity, Entity):
                         if price and price < best_price:
                             best_price = price
                             best_station = station
-                            best_station["selected_fuel_type"] = ft
-                            best_station["selected_price"] = price
+                            selected_fuel_type = ft
+                            selected_price = price
                 else:
                     price = price_obj.get(fuel_type)
                     if price and price < best_price:
                         best_price = price
                         best_station = station
-                        best_station["selected_fuel_type"] = fuel_type
-                        best_station["selected_price"] = price
+                        selected_fuel_type = fuel_type
+                        selected_price = price
 
             if best_station:
                 self._state = best_station.get("name", "Unknown Station")
@@ -116,8 +118,8 @@ class FwcamStationSensor(CoordinatorEntity, Entity):
                     "longitude": best_station.get("lng"),
                     "distance": best_station.get("dist"),
                     "is_open": best_station.get("isOpen"),
-                    "fuel_type": best_station.get("selected_fuel_type"),
-                    "price": best_station.get("selected_price"),
+                    "fuel_type": selected_fuel_type,
+                    "price": selected_price,
                     "e5_price": best_station.get("price", {}).get("e5"),
                     "e10_price": best_station.get("price", {}).get("e10"),
                     "diesel_price": best_station.get("price", {}).get("diesel"),
@@ -140,7 +142,7 @@ class FwcamStationSensor(CoordinatorEntity, Entity):
                     "Best station: %s at €%.3f for %s (%d stations available)",
                     self._state,
                     best_price,
-                    best_station.get("selected_fuel_type"),
+                    selected_fuel_type,
                     len(stations),
                 )
             else:

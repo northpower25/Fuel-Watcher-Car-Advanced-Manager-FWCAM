@@ -20,7 +20,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS
 
 from .const import DOMAIN, CONF_FUEL_TYPE, CONF_TANKERKOENIG_API_KEY, DEFAULT_FUEL_TYPE
-from .providers.tankerkönig import TankerkoenigProvider
+from .providers.tankerkoenig import TankerkoenigProvider
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -16,6 +16,9 @@ DEFAULT_FUEL_TYPE = "e5"
 DEFAULT_RADIUS = 5
 DEFAULT_NOTIFY_CHANNELS = []
 
+# Valid fuel types for Tankerkönig API
+FUEL_TYPE_OPTIONS = ["e5", "e10", "diesel", "all"]
+
 # Sensor attribute keys
 ATTR_LITERS = "liters"
 ATTR_ODOMETER = "odometer"
