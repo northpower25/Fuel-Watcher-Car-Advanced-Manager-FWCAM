@@ -58,7 +58,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
                 vol.Optional(CONF_LONGITUDE, default=default_lon): vol.Coerce(float),
                 vol.Optional(CONF_RADIUS, default=DEFAULT_RADIUS): vol.Coerce(int),
-                vol.Optional(CONF_FUEL_TYPE, default=DEFAULT_FUEL_TYPE): str,
+                vol.Optional(CONF_FUEL_TYPE, default=DEFAULT_FUEL_TYPE): vol.In(FUEL_TYPE_OPTIONS),
+                vol.Required(CONF_TANKERKOENIG_API_KEY): str,
                 vol.Optional(CONF_NOTIFY_CHANNELS, default=DEFAULT_NOTIFY_CHANNELS): list,
             }
         )
@@ -91,6 +92,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             CONF_LONGITUDE: lon,
             CONF_RADIUS: user_input.get(CONF_RADIUS, DEFAULT_RADIUS),
             CONF_FUEL_TYPE: user_input.get(CONF_FUEL_TYPE, DEFAULT_FUEL_TYPE),
+            CONF_TANKERKOENIG_API_KEY: user_input.get(CONF_TANKERKOENIG_API_KEY, ""),
             CONF_NOTIFY_CHANNELS: user_input.get(CONF_NOTIFY_CHANNELS, DEFAULT_NOTIFY_CHANNELS),
         }
 
@@ -114,9 +116,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             from .const import (
                 CONF_FUEL_TYPE,
                 CONF_NOTIFY_CHANNELS,
+                CONF_TANKERKOENIG_API_KEY,
                 DEFAULT_FUEL_TYPE,
                 DEFAULT_RADIUS,
                 DEFAULT_NOTIFY_CHANNELS,
+                FUEL_TYPE_OPTIONS,
             )
             import voluptuous as vol
         except Exception as exc:
@@ -129,7 +133,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(CONF_LATITUDE, default=current.get(CONF_LATITUDE, self.config_entry.data.get(CONF_LATITUDE))): vol.Coerce(float),
                 vol.Optional(CONF_LONGITUDE, default=current.get(CONF_LONGITUDE, self.config_entry.data.get(CONF_LONGITUDE))): vol.Coerce(float),
                 vol.Optional(CONF_RADIUS, default=current.get(CONF_RADIUS, self.config_entry.data.get(CONF_RADIUS, DEFAULT_RADIUS))): vol.Coerce(int),
-                vol.Optional(CONF_FUEL_TYPE, default=current.get(CONF_FUEL_TYPE, self.config_entry.data.get(CONF_FUEL_TYPE, DEFAULT_FUEL_TYPE))): str,
+                vol.Optional(CONF_FUEL_TYPE, default=current.get(CONF_FUEL_TYPE, self.config_entry.data.get(CONF_FUEL_TYPE, DEFAULT_FUEL_TYPE))): vol.In(FUEL_TYPE_OPTIONS),
+                vol.Optional(CONF_TANKERKOENIG_API_KEY, default=current.get(CONF_TANKERKOENIG_API_KEY, self.config_entry.data.get(CONF_TANKERKOENIG_API_KEY, ""))): str,
                 vol.Optional(CONF_NOTIFY_CHANNELS, default=current.get(CONF_NOTIFY_CHANNELS, self.config_entry.data.get(CONF_NOTIFY_CHANNELS, DEFAULT_NOTIFY_CHANNELS))): list,
             }
         )
